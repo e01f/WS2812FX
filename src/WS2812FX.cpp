@@ -7,11 +7,11 @@
 
   FEATURES
     * A lot of blinken modes and counting
-    * WS2812FX can be used as drop-in replacement for Adafruit NeoPixel Library
+    * WS2812FX can be used as drop-in replacement for Adafruit NeoMatrix Library
 
   NOTES
-    * Uses the Adafruit NeoPixel library. Get it here:
-      https://github.com/adafruit/Adafruit_NeoPixel
+    * Uses the Adafruit NeoMatrix library. Get it here:
+      https://github.com/adafruit/Adafruit_NeoMatrix
 
 
 
@@ -56,7 +56,7 @@
 
 void WS2812FX::init() {
   resetSegmentRuntimes();
-  Adafruit_NeoPixel::begin();
+  Adafruit_NeoMatrix::begin();
 }
 
 // void WS2812FX::timer() {
@@ -109,9 +109,9 @@ void WS2812FX::setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b) {
 
 void WS2812FX::setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
   if(IS_GAMMA) {
-    Adafruit_NeoPixel::setPixelColor(n, gamma8(r), gamma8(g), gamma8(b), gamma8(w));
+    Adafruit_NeoMatrix::setPixelColor(n, gamma8(r), gamma8(g), gamma8(b), gamma8(w));
   } else {
-    Adafruit_NeoPixel::setPixelColor(n, r, g, b, w);
+    Adafruit_NeoMatrix::setPixelColor(n, r, g, b, w);
   }
 }
 
@@ -150,15 +150,15 @@ void WS2812FX::copyPixels(uint16_t dest, uint16_t src, uint16_t count) {
 
 // change the underlying Adafruit_NeoPixel pixels pointer (use with care)
 void WS2812FX::setPixels(uint16_t num_leds, uint8_t* ptr) {
-  free(Adafruit_NeoPixel::pixels); // free existing data (if any)
-  Adafruit_NeoPixel::pixels = ptr;
-  Adafruit_NeoPixel::numLEDs = num_leds;
-  Adafruit_NeoPixel::numBytes = num_leds * ((wOffset == rOffset) ? 3 : 4);
+  free(Adafruit_NeoMatrix::pixels); // free existing data (if any)
+  Adafruit_NeoMatrix::pixels = ptr;
+  Adafruit_NeoMatrix::numLEDs = num_leds;
+  Adafruit_NeoMatrix::numBytes = num_leds * ((wOffset == rOffset) ? 3 : 4);
 }
 
 // overload show() functions so we can use custom show()
 void WS2812FX::show(void) {
-  customShow == NULL ? Adafruit_NeoPixel::show() : customShow();
+  customShow == NULL ? Adafruit_NeoMatrix::show() : customShow();
 }
 
 void WS2812FX::start() {
@@ -238,7 +238,7 @@ void WS2812FX::setColors(uint8_t seg, uint32_t* c) {
 
 void WS2812FX::setBrightness(uint8_t b) {
 //b = constrain(b, BRIGHTNESS_MIN, BRIGHTNESS_MAX);
-  Adafruit_NeoPixel::setBrightness(b);
+  Adafruit_NeoMatrix::setBrightness(b);
   show();
 }
 
@@ -258,12 +258,12 @@ void WS2812FX::setLength(uint16_t b) {
 
   // Decrease numLEDs to maximum available memory
   do {
-      Adafruit_NeoPixel::updateLength(b);
+      Adafruit_NeoMatrix::updateLength(b);
       b--;
-  } while(!Adafruit_NeoPixel::numLEDs && b > 1);
+  } while(!Adafruit_NeoMatrix::numLEDs && b > 1);
 
   _segments[0].start = 0;
-  _segments[0].stop = Adafruit_NeoPixel::numLEDs - 1;
+  _segments[0].stop = Adafruit_NeoMatrix::numLEDs - 1;
 }
 
 void WS2812FX::increaseLength(uint16_t s) {
@@ -558,7 +558,7 @@ void WS2812FX::resetSegmentRuntime(uint8_t seg) {
  * Turns everything off. Doh.
  */
 void WS2812FX::strip_off() {
-  Adafruit_NeoPixel::clear();
+  Adafruit_NeoMatrix::clear();
   show();
 }
 

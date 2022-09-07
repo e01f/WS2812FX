@@ -5,10 +5,10 @@
   www.aldick.org
   FEATURES
     * A lot of blinken modes and counting
-    * WS2812FX can be used as drop-in replacement for Adafruit NeoPixel Library
+    * WS2812FX can be used as drop-in replacement for Adafruit NeoMatrix Library
   NOTES
-    * Uses the Adafruit NeoPixel library. Get it here:
-      https://github.com/adafruit/Adafruit_NeoPixel
+    * Uses the Adafruit NeoMatrix library. Get it here:
+      https://github.com/adafruit/Adafruit_NeoMatrix
   LICENSE
   The MIT License (MIT)
   Copyright (c) 2016  Harm Aldick
@@ -40,7 +40,7 @@
 #define FSH(x) (__FlashStringHelper*)(x)
 #define MAX_MILLIS (0UL - 1UL) /* ULONG_MAX */
 
-#include <Adafruit_NeoPixel.h>
+#include <Adafruit_NeoMatrix.h>
 
 #define DEFAULT_BRIGHTNESS (uint8_t)50
 #define DEFAULT_MODE       (uint8_t)0
@@ -120,7 +120,7 @@
 #define CLR_CYCLE       (_seg_rt->aux_param2 &= ~CYCLE)
 #define CLR_FRAME_CYCLE (_seg_rt->aux_param2 &= ~(FRAME | CYCLE))
 
-class WS2812FX : public Adafruit_NeoPixel {
+class WS2812FX : public Adafruit_NeoMatrix {
 
   public:
     typedef uint16_t (WS2812FX::*mode_ptr)(void);
@@ -146,11 +146,12 @@ class WS2812FX : public Adafruit_NeoPixel {
       uint8_t* extDataSrc = NULL; // external data array
       uint16_t extDataCnt = 0;    // number of elements in the external data array
     } segment_runtime;
-
+	
+	// Simple stripe constructor
     WS2812FX(uint16_t num_leds, uint8_t pin, neoPixelType type,
       uint8_t max_num_segments=MAX_NUM_SEGMENTS,
       uint8_t max_num_active_segments=MAX_NUM_ACTIVE_SEGMENTS)
-      : Adafruit_NeoPixel(num_leds, pin, type) {
+      : Adafruit_NeoMatrix(num_leds, pin, type) {
 
       brightness = DEFAULT_BRIGHTNESS + 1; // Adafruit_NeoPixel internally offsets brightness by 1
       _running = false;
@@ -170,6 +171,57 @@ class WS2812FX : public Adafruit_NeoPixel {
       resetSegments();
       setSegment(0, 0, num_leds - 1, DEFAULT_MODE, DEFAULT_COLOR, DEFAULT_SPEED, NO_OPTIONS);
     };
+	
+	// Constructor for single matrix
+	WS2812FX(int w, int h, uint8_t pin = 6,
+	  uint8_t matrixType = NEO_MATRIX_TOP + NEO_MATRIX_LEFT + NEO_MATRIX_ROWS,
+	  neoPixelType ledType = NEO_GRB + NEO_KHZ800)
+	  : Adafruit_NeoMatrix(w, h, pin, matrixType, ledType) {
+
+		  brightness = DEFAULT_BRIGHTNESS + 1; // Adafruit_NeoPixel internally offsets brightness by 1
+		  _running = false;
+
+		  _segments_len = MAX_NUM_SEGMENTS;
+		  _active_segments_len = MAX_NUM_ACTIVE_SEGMENTS;
+
+		  // create all the segment arrays and init to zeros
+		  _segments = new segment[_segments_len]();
+		  _active_segments = new uint8_t[_active_segments_len]();
+		  _segment_runtimes = new segment_runtime[_active_segments_len]();
+
+		  // init segment pointers
+		  _seg     = _segments;
+		  _seg_rt  = _segment_runtimes;
+
+		  resetSegments();
+		  setSegment(0, 0, w * h - 1, DEFAULT_MODE, DEFAULT_COLOR, DEFAULT_SPEED, NO_OPTIONS);
+	  };
+	
+	// Constructor for tiled matrix
+	WS2812FX(uint8_t matrixW, uint8_t matrixH, uint8_t tX, uint8_t tY,
+	  uint8_t pin = 6,
+	  uint8_t matrixType = NEO_MATRIX_TOP + NEO_MATRIX_LEFT + NEO_MATRIX_ROWS + NEO_TILE_TOP + NEO_TILE_LEFT + NEO_TILE_ROWS,
+	  neoPixelType ledType = NEO_GRB + NEO_KHZ800)
+	  : Adafruit_NeoMatrix(matrixW, matrixH, tX, tY, pin, matrixType, ledType) {
+
+		  brightness = DEFAULT_BRIGHTNESS + 1; // Adafruit_NeoPixel internally offsets brightness by 1
+		  _running = false;
+
+		  _segments_len = MAX_NUM_SEGMENTS;
+		  _active_segments_len = MAX_NUM_ACTIVE_SEGMENTS;
+
+		  // create all the segment arrays and init to zeros
+		  _segments = new segment[_segments_len]();
+		  _active_segments = new uint8_t[_active_segments_len]();
+		  _segment_runtimes = new segment_runtime[_active_segments_len]();
+
+		  // init segment pointers
+		  _seg     = _segments;
+		  _seg_rt  = _segment_runtimes;
+
+		  resetSegments();
+		  setSegment(0, 0, matrixW * matrixH - 1, DEFAULT_MODE, DEFAULT_COLOR, DEFAULT_SPEED, NO_OPTIONS);
+	  };
 
     void
 //    timer(void),
@@ -483,7 +535,7 @@ class WS2812FXT {
         dest->blend(dest_p, vstart_p, vstop_p, numBytes, blendAmt);
       }
 
-      dest->Adafruit_NeoPixel::show();
+      dest->Adafruit_NeoMatrix::show();
     }
 
   public:
